@@ -8,13 +8,13 @@
 long balance = 0;
 
 void* deposit(void* arg){
-    int threat_id = *(int*)arg;
+    int thread_id = *(int*)arg;
 
     for (int i = 0; i < ITERATIONS; i++){
         balance += 1;
     }
 
-    printf('Thread %d finished depositing. \n', threat_id);
+    printf("Thread %d finished depositing. \n", thread_id);
     return NULL;
 }
 
@@ -33,9 +33,7 @@ int main(){
     }
 
     printf("Final balance: %ld\n", balance);
-    printf("Expected balance: %ld\n", NUM_THREADS * ITERATIONS);
+    printf("Expected balance: %ld\n", (long)NUM_THREADS * ITERATIONS);
 
     return 0;
-
-
 }
