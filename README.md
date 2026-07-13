@@ -67,3 +67,46 @@ proceeds uncontested, while the other simply waits its turn.
 eliminates the possibility of circular wait at the design level, with no
 retry logic or added complexity, at the minor cost of requiring careful
 lock-order discipline across the whole codebase.
+
+### File: `task1/scheduler.c`
+**Purpose:** Simulates round-robin CPU scheduling for 4 processes with a
+fixed time quantum of 2 units. Tracks waiting time and turnaround time
+for each process.
+
+**Compile:**
+```bash
+cd task1
+gcc -o scheduler scheduler.c
+```
+
+**Run:**
+```bash
+./scheduler
+```
+
+**Result:** All 4 processes complete in cyclical 2-unit time slices.
+Process with shortest burst time (P3, burst=3) finishes first (turnaround
+13); process with longest burst time (P2, burst=8) has highest turnaround
+(22), consistent with round-robin's fairness property - no process waits
+indefinitely, but longer jobs naturally take longer to fully complete.
+Average waiting time: 12.25 units; average turnaround time: 17.75 units.
+
+### File: `task2/memory_sim.c` (FIFO Page Replacement)
+**Purpose:** Simulates FIFO page replacement over a fixed reference string
+{7,0,1,2,0,3,0,4,2,3,0,3,2} with 3 memory frames. Evicts the page that
+has resided in memory the longest, regardless of recent usage.
+
+**Compile:**
+```bash
+cd task2
+gcc -o memory_sim memory_sim.c
+```
+
+**Run:**
+```bash
+./memory_sim
+```
+
+**Result:** 10 page faults, 3 hits out of 13 requests (23.08% hit ratio).
+Frame eviction order follows strict insertion order (oldest-loaded page
+evicted first), verified by manual trace.
