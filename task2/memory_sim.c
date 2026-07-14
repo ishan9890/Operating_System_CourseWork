@@ -59,8 +59,88 @@ void run_fifo(int ref_string[], int n){
     printf("Miss Ratio: %.2f%%\n", (float)faults / n * 100);
 }
 
+int lru_frames[NUM_FRAMES];
+int last_used[NUM_FRAMES];
+
+int is_page_in_lru_memory(int page){
+    for (int i = 0; i < NUM_FRAMES; i++){
+        if (lru_frames[i] == page){
+            return i;
+        }
+    }
+    return -1; 
+}
+
+int find_lru_victim(){
+    int victim = 0;
+    for(int i = 1; i<NUM_FRAMES; i++){
+        if(last_used[i] < last_used[victim]){
+            victim = i;
+        }
+    }
+    return victim;
+}
+
+void print_lru_frames(){
+    printf("[ ");
+    for (int i = 0; i< NUM_FRAMES; i++){
+        if (lru_frames[i] == -1){
+            printf("_ ");
+        } else {
+            printf("%d ", lru_frames[i]);
+        }
+    }
+    printf("]");
+}
+
+void run_lru(int ref_string[], int n){
+    int hits = 0, faults = 0;
+    int clock = 0;
+
+    for (int i = 0; i<NUM_FRAMES; i++){
+        lru_frames[i] = -1;
+        last_used[i] = -1;
+    }
+
+    printf("LRU page replacement \n");
+    for (int i = 0; i<n; i++){
+        int page = ref_string[i];
+        printf("Request page %d:", page);
+
+        int found_index = is_page_in_lru_memory(page);
+        if (found_index != -1){
+            hits++;
+            last_used[found_index] = clock;
+            printf("Hit! ");
+        } else {
+            faults++;
+            int victim = -1;
+            for (int j = 0; j<NUM_FRAMES; j++){
+                if (lru_frames[j] == -1){
+                    victim = j;
+                    break;
+                }
+            }
+            if (victim == -1){
+                victim = find_lru_victim();
+            }
+            lru_frames[victim] = page;
+            last_used[victim] = clock;
+            printf("Fault! ");
+        } 
+        
+        print_lru_frames();
+        printf("\n");
+        clock++;
+    }
+    printf("\nTotal Hits: %d\n", hits);
+    printf("Total Faults: %d\n", faults);
+    printf("Hit Ratio: %.2f%%\n", (float)hits / n * 100);
+    printf("Miss Ratio: %.2f%%\n", (float)faults / n * 100);
+}
 int main(){
     int ref_string[REF_LENGTH] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2};
     run_fifo(ref_string, REF_LENGTH);
+    run_lru(ref_string, REF_LENGTH);
     return 0;
 }

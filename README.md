@@ -110,3 +110,18 @@ gcc -o memory_sim memory_sim.c
 **Result:** 10 page faults, 3 hits out of 13 requests (23.08% hit ratio).
 Frame eviction order follows strict insertion order (oldest-loaded page
 evicted first), verified by manual trace.
+
+### File: `task2/memory_sim.c` (LRU Page Replacement)
+**Purpose:** Simulates LRU page replacement over the same reference string
+and frame count as the FIFO test, for direct comparison. Evicts the page
+that has not been accessed for the longest time, tracked via a logical
+clock updated on every access (including hits).
+
+**Compile/Run:** Same file as FIFO (`memory_sim.c`) — both algorithms run
+sequentially in `main()`.
+
+**Result:** 9 page faults, 4 hits (30.77% hit ratio) - outperforming FIFO
+(10 faults, 23.08% hit ratio) on the identical reference string. LRU's
+advantage comes from tracking recency of use: e.g. page 0, accessed
+recently before eviction was needed, was retained by LRU but had already
+been evicted by FIFO earlier in the sequence, causing FIFO an extra fault.
