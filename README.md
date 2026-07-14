@@ -125,3 +125,14 @@ sequentially in `main()`.
 advantage comes from tracking recency of use: e.g. page 0, accessed
 recently before eviction was needed, was retained by LRU but had already
 been evicted by FIFO earlier in the sequence, causing FIFO an extra fault.
+
+### File: `task2/memory_sim.c` (Configurable Page Size)
+**Purpose:** Extends the paging simulation with a configurable page size
+(`PAGE_SIZE_KB`) and process size (`PROCESS_SIZE_KB`), calculating the
+number of pages a process actually requires via ceiling division, and
+comparing this against available physical memory (frames x page size).
+
+**Result:** With page size = 4KB and process size = 50KB, the process
+requires 13 pages, but only 3 frames (12KB) of physical memory are
+available - confirming that page replacement is necessary, which the
+FIFO/LRU simulations below directly demonstrate.

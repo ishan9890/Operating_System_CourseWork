@@ -3,6 +3,33 @@
 #define NUM_FRAMES 3
 #define REF_LENGTH 13
 
+#define PAGE_SIZE_KB 4
+#define PROCESS_SIZE_KB 50
+
+int calculate_pages_needed(int process_size_kb, int page_size_kb){
+    return (process_size_kb + page_size_kb - 1) / page_size_kb;
+}
+
+void print_memory_config(){
+    int pages_needed = calculate_pages_needed(PROCESS_SIZE_KB, PAGE_SIZE_KB);
+    int physical_memory_size_kb = NUM_FRAMES * PAGE_SIZE_KB;
+    printf("Memory Configuration:\n");
+    printf("Page Size: %d KB\n", PAGE_SIZE_KB);
+    printf("Process Size: %d KB\n", PROCESS_SIZE_KB);
+    printf("Pages Needed by Processes: %d (ceil(%d / %d))\n", pages_needed, PROCESS_SIZE_KB, PAGE_SIZE_KB);
+    printf("Physical Memory Available: %d KB (%d frames x %d KB)\n", physical_memory_size_kb, NUM_FRAMES, PAGE_SIZE_KB);
+
+    if (pages_needed > NUM_FRAMES) {
+        printf("Note: Process requires more pages (%d) than available frames (%d).\n",
+                pages_needed, NUM_FRAMES);
+        printf("This means not all pages can be resident simultaneously,\n");
+        printf("making page replacement necessary — this is exactly what\n");
+        printf("the FIFO/LRU simulations below demonstrate.\n");
+    }
+    printf("\n");
+}
+
+
 int frames[NUM_FRAMES];
 
 int is_page_in_memory(int page){
@@ -140,6 +167,8 @@ void run_lru(int ref_string[], int n){
 }
 int main(){
     int ref_string[REF_LENGTH] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2};
+
+    print_memory_config();
     run_fifo(ref_string, REF_LENGTH);
     run_lru(ref_string, REF_LENGTH);
     return 0;
