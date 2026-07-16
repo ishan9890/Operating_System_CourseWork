@@ -159,3 +159,16 @@ with their respective password, as registered in `main()`).
 **Result:** Correct credentials log in successfully; incorrect password
 decrements remaining attempts (3 total); unknown username or exceeding
 3 attempts results in login failure/lockout.
+
+### File: `task3/secure_fs.c` (File Operations + Audit Logging)
+**Purpose:** Adds a menu-driven interface for file create/write/read/delete
+operations, with every successful operation automatically logged to
+`audit.log` (timestamp, username, action, filename).
+
+**Compile/Run:** Same file as authentication (`secure_fs.c`).
+
+**Result:** Full create -> write -> read -> delete -> verify-deleted
+sequence tested successfully. Reading a deleted file correctly fails with
+a clear error message. `audit.log` accurately records all four operations
+with timestamps and the acting username, providing a traceable record of
+file system activity.

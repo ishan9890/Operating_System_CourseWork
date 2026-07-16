@@ -1,0 +1,4 @@
+[Thu Jul 16 11:17:44 2026] User 'ishan' performed 'CREATE' on file 'test.txt' 
+[Thu Jul 16 11:18:16 2026] User 'ishan' performed 'WRITE' on file 'test.txt' 
+[Thu Jul 16 11:18:23 2026] User 'ishan' performed 'READ' on file 'test.txt' 
+[Thu Jul 16 11:18:36 2026] User 'ishan' performed 'DELETE' on file 'test.txt' 
