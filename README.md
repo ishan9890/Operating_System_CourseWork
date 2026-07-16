@@ -136,3 +136,26 @@ comparing this against available physical memory (frames x page size).
 requires 13 pages, but only 3 frames (12KB) of physical memory are
 available - confirming that page replacement is necessary, which the
 FIFO/LRU simulations below directly demonstrate.
+
+### File: `task3/secure_fs.c` (Authentication System)
+**Purpose:** Implements user authentication using a custom djb2-based
+password hashing function (passwords are never stored or compared in
+plaintext). Includes a 3-attempt lockout to mitigate brute-force guessing.
+
+**Compile:**
+```bash
+cd task3
+gcc -o secure_fs secure_fs.c
+```
+
+**Run:**
+```bash
+./secure_fs
+```
+
+**Test credentials:** username `ishan`, password `password123` (or `faker`
+with their respective password, as registered in `main()`).
+
+**Result:** Correct credentials log in successfully; incorrect password
+decrements remaining attempts (3 total); unknown username or exceeding
+3 attempts results in login failure/lockout.
