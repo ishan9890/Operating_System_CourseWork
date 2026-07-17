@@ -172,3 +172,20 @@ sequence tested successfully. Reading a deleted file correctly fails with
 a clear error message. `audit.log` accurately records all four operations
 with timestamps and the acting username, providing a traceable record of
 file system activity.
+
+### File: `task3/secure_fs.c` (File Permission System)
+**Purpose:** Implements a Unix-style owner/group/others permission model
+per file, enforced before every read/write/delete operation. Permissions
+persist across program runs via `permissions.dat`.
+
+**Result:** Two-session test confirmed: owner (`ishan`) has full read/write
+access; a different user (`faker`) is correctly denied write access but
+retains default read access, matching the default permission scheme
+(owner: rwx, group/others: r--). Permission records persist correctly
+between separate program executions.
+
+**Bug Fixed:** An earlier version opened the file in write mode (`"w"`,
+which truncates on open) *before* checking permissions, causing silent
+data loss even when a write was subsequently denied. Fixed by moving the
+permission check before any file is opened - a general security principle
+that access checks must precede, never follow, a state-changing action.
