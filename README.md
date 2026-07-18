@@ -189,3 +189,21 @@ which truncates on open) *before* checking permissions, causing silent
 data loss even when a write was subsequently denied. Fixed by moving the
 permission check before any file is opened - a general security principle
 that access checks must precede, never follow, a state-changing action.
+
+### File: `task3/secure_fs.c` (Encryption/Decryption)
+**Purpose:** Adds XOR-cipher based encryption/decryption for sensitive
+files, using a fixed shared key (`ENCRYPTION_KEY`). Encryption requires
+write permission; decryption requires read permission on the target file.
+
+**Result:** `sense.txt` (plaintext: "top sense") was encrypted, verified
+unreadable via direct `cat` (binary garbage output), then decrypted in a
+separate program execution, restoring the exact original content. Confirms
+XOR's self-inverse property (same operation both encrypts and decrypts)
+works correctly and persists correctly to disk across runs.
+
+**Security Note:** XOR cipher with a static repeating key is used here to
+demonstrate the encryption/decryption *concept* clearly, but is NOT
+cryptographically secure for real use - it is vulnerable to frequency
+analysis and known-plaintext attacks, particularly when the key is shorter
+than the data. A production system should use a vetted algorithm (e.g.
+AES-256) via a library such as OpenSSL's libcrypto.

@@ -265,6 +265,80 @@ void delete_file(const char* filename) {
     }
 }
 
+#define ENCRYPTION_KEY "MySecretKey2026" 
+
+void xor_encrypt_decrypt(char* data, int length, const char* key) {
+    int key_len = strlen(key);
+    for (int i = 0; i < length; i++) {
+        data[i] = data[i] ^ key[i % key_len];  // cycles through the key repeatedly
+    }
+}
+void encrypt_file(const char* filename) {
+    if (!check_permission(current_user, filename, 'w')) {
+        printf("Access denied: '%s' does not have write permission on '%s'.\n",
+               current_user, filename);
+        log_action(current_user, "ENCRYPT-DENIED", filename);
+        return;
+    }
+
+    FILE* f = fopen(filename, "rb");
+    if (f == NULL) {
+        printf("Error: could not open '%s' for encryption.\n", filename);
+        return;
+    }
+
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    char* buffer = malloc(size);
+    fread(buffer, 1, size, f);
+    fclose(f);
+
+    xor_encrypt_decrypt(buffer, size, ENCRYPTION_KEY);
+
+    FILE* out = fopen(filename, "wb");
+    fwrite(buffer, 1, size, out);
+    fclose(out);
+
+    free(buffer);
+    printf("File '%s' encrypted successfully.\n", filename);
+    log_action(current_user, "ENCRYPT", filename);
+}
+
+void decrypt_file(const char* filename) {
+    if (!check_permission(current_user, filename, 'r')) {
+        printf("Access denied: '%s' does not have read permission on '%s'.\n",
+               current_user, filename);
+        log_action(current_user, "DECRYPT-DENIED", filename);
+        return;
+    }
+
+    FILE* f = fopen(filename, "rb");
+    if (f == NULL) {
+        printf("Error: could not open '%s' for decryption.\n", filename);
+        return;
+    }
+
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    char* buffer = malloc(size);
+    fread(buffer, 1, size, f);
+    fclose(f);
+
+    xor_encrypt_decrypt(buffer, size, ENCRYPTION_KEY);
+
+    FILE* out = fopen(filename, "wb");
+    fwrite(buffer, 1, size, out);
+    fclose(out);
+
+    free(buffer);
+    printf("File '%s' decrypted successfully.\n", filename);
+    log_action(current_user, "DECRYPT", filename);
+}
+
 int main() {
     load_permissions();   
 
@@ -308,8 +382,10 @@ int main() {
         printf("2. Write to file\n");
         printf("3. Read file\n");
         printf("4. Delete file\n");
-        printf("5. Exit\n");
-        printf("6. View file permissions\n");
+        printf("5. View file permissions\n");
+        printf("6. Encrypt file\n");
+        printf("7. Decrypt file\n");
+        printf("8. Exit\n");
         printf("Choice: ");
         scanf("%d", &choice);
 
@@ -337,17 +413,27 @@ int main() {
                 delete_file(filename);
                 break;
             case 5:
-                printf("Exiting. Goodbye, %s.\n", current_user);
-                break;
-            case 6:
                 printf("Enter filename: ");
                 scanf("%s", filename);
                 print_permissions(filename);
                 break;
+            case 6:
+                printf("Enter filename: ");
+                scanf("%s", filename);
+                encrypt_file(filename);
+                break;
+            case 7:
+                printf("Enter filename: ");
+                scanf("%s", filename);
+                decrypt_file(filename);
+                break;
+            case 8:
+                printf("Exiting. Goodbye, %s.\n", current_user);
+                break;
             default:
                 printf("Invalid choice.\n");
         }
-    } while (choice != 5);
+    } while (choice != 8);
 
     return 0;
 
