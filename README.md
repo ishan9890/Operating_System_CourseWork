@@ -207,3 +207,28 @@ cryptographically secure for real use - it is vulnerable to frequency
 analysis and known-plaintext attacks, particularly when the key is shorter
 than the data. A production system should use a vetted algorithm (e.g.
 AES-256) via a library such as OpenSSL's libcrypto.
+
+### Files: `task4/server.c`, `task4/client.c` (Basic Socket Communication)
+**Purpose:** Establishes a minimal TCP client-server connection using
+BSD sockets on port 8080 (localhost). Server accepts one connection,
+exchanges a single message with the client, then exits.
+
+**Compile:**
+```bash
+cd task4
+gcc -o server server.c
+gcc -o client client.c
+```
+
+**Run (two terminals required):**
+```bash
+# Terminal 1
+./server
+
+# Terminal 2 (after server is running)
+./client
+```
+
+**Result:** Client successfully connects, sends "Hello from client!",
+and receives "Hello from server!" in response. Server correctly logs
+the connection and received message before exiting.
