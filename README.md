@@ -232,3 +232,26 @@ gcc -o client client.c
 **Result:** Client successfully connects, sends "Hello from client!",
 and receives "Hello from server!" in response. Server correctly logs
 the connection and received message before exiting.
+
+### Files: `task4/server.c`, `task4/client.c` (Command Protocol)
+**Purpose:** Implements a simple text-based command protocol. Client sends
+`LOGIN <user> <pass>`, `MSG <text>`, or `QUIT`; server parses the command
+prefix and responds with `OK ...` or `ERROR ...`.
+
+**Compile/Run:** Same as basic socket test (see above), now interactive -
+client prompts for commands with `>` after connecting.
+
+**Result:** Full command sequence (LOGIN, MSG, QUIT) tested successfully.
+Server correctly parses each command type and responds appropriately;
+QUIT cleanly terminates the connection on both sides without errors.
+
+### Files: `task4/server.c`, `task4/client.c` (Authentication)
+**Purpose:** Adds real credential checking to the LOGIN command using the
+same djb2 password hashing approach as Task 3. MSG commands are rejected
+with an error unless the client has successfully authenticated first.
+
+**Result:** Verified two scenarios - (1) sending MSG before LOGIN is
+correctly rejected with a clear error; after successful LOGIN, MSG
+commands succeed and are tagged with the authenticated username. (2)
+LOGIN with an incorrect password is correctly rejected with "Invalid
+credentials", and the connection remains unauthenticated.

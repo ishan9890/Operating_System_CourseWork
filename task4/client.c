@@ -11,15 +11,14 @@ int main() {
     int sock_fd;
     struct sockaddr_in server_address;
     char buffer[BUFFER_SIZE];
+    char input[BUFFER_SIZE];
 
-    // 1. Create socket
     sock_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (sock_fd < 0) {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
 
-    // 2. Configure server address to connect to
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
 
@@ -28,25 +27,32 @@ int main() {
         exit(EXIT_FAILURE);
     }
 
-    // 3. Connect to the server
     if (connect(sock_fd, (struct sockaddr*)&server_address, sizeof(server_address)) < 0) {
         perror("Connection failed");
         exit(EXIT_FAILURE);
     }
     printf("Connected to server.\n");
+    printf("Commands: LOGIN <user> <pass> | MSG <text> | QUIT\n");
 
-    // 4. Send a message
-    char* message = "Hello from client!";
-    write(sock_fd, message, strlen(message));
-    printf("Message sent.\n");
+    while (1) {
+        printf("> ");
+        if (fgets(input, BUFFER_SIZE, stdin) == NULL) break;
 
-    // 5. Read the server's reply
-    int bytes_read = read(sock_fd, buffer, BUFFER_SIZE - 1);
-    buffer[bytes_read] = '\0';
-    printf("Received from server: %s\n", buffer);
+        write(sock_fd, input, strlen(input));
 
-    // 6. Clean up
+        int bytes_read = read(sock_fd, buffer, BUFFER_SIZE - 1);
+        if (bytes_read <= 0) {
+            printf("Server closed the connection.\n");
+            break;
+        }
+        buffer[bytes_read] = '\0';
+        printf("Server: %s", buffer);
+
+        if (strncmp(input, "QUIT", 4) == 0) {
+            break;
+        }
+    }
+
     close(sock_fd);
-
     return 0;
 }
