@@ -55,43 +55,62 @@ void handle_client(int client_fd) {
         buffer[bytes_read] = '\0';
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        printf("Received: %s\n", buffer);
-
         char response[BUFFER_SIZE];
 
-        if (strncmp(buffer, "LOGIN ", 6) == 0) {
-            char username[MAX_LEN], password[MAX_LEN];
-            sscanf(buffer + 6, "%s %s", username, password);
-
-            if (check_credentials(username, password)) {
-                authenticated = 1;
-                strcpy(logged_in_user, username);
-                snprintf(response, BUFFER_SIZE, "OK Login successful for %s\n", username);
-            } else {
-                snprintf(response, BUFFER_SIZE, "ERROR Invalid credentials\n");
-            }
-
-        } else if (strncmp(buffer, "MSG ", 4) == 0) {
-            if (!authenticated) {
-                snprintf(response, BUFFER_SIZE, "ERROR Please LOGIN before sending messages\n");
-            } else {
-                snprintf(response, BUFFER_SIZE, "OK [%s] Message received: %s\n",
-                         logged_in_user, buffer + 4);
-            }
-
-        } else if (strcmp(buffer, "QUIT") == 0) {
-            snprintf(response, BUFFER_SIZE, "OK Goodbye\n");
+        // Validation 1: reject empty input
+        if (strlen(buffer) == 0) {
+            snprintf(response, BUFFER_SIZE, "ERROR Empty command\n");
             write(client_fd, response, strlen(response));
-            break;
-
-        } else {
-            snprintf(response, BUFFER_SIZE, "ERROR Unknown command\n");
+            continue;
         }
+
+        printf("Received: %s\n", buffer);
+
+        if (strncmp(buffer, "LOGIN", 5) == 0) {
+    char username[MAX_LEN] = "", password[MAX_LEN] = "";
+    int parsed = 0;
+
+    if (strlen(buffer) > 5) {
+        parsed = sscanf(buffer + 5, "%49s %49s", username, password);
+    }
+
+    if (parsed != 2) {
+        snprintf(response, BUFFER_SIZE, "ERROR Usage: LOGIN <username> <password>\n");
+    } else if (check_credentials(username, password)) {
+        authenticated = 1;
+        strcpy(logged_in_user, username);
+        snprintf(response, BUFFER_SIZE, "OK Login successful for %s\n", username);
+    } else {
+        snprintf(response, BUFFER_SIZE, "ERROR Invalid credentials\n");
+    }
+
+} else if (strncmp(buffer, "MSG", 3) == 0) {
+    if (!authenticated) {
+        snprintf(response, BUFFER_SIZE, "ERROR Please LOGIN before sending messages\n");
+    } else if (strlen(buffer) <= 4) {   // "MSG" alone, or "MSG " with nothing after
+        snprintf(response, BUFFER_SIZE, "ERROR Usage: MSG <text>\n");
+    } else {
+        snprintf(response, BUFFER_SIZE, "OK [%s] Message received: %s\n",
+                 logged_in_user, buffer + 4);
+    }
+} else if (strcmp(buffer, "QUIT") == 0) {
+    snprintf(response, BUFFER_SIZE, "OK Goodbye\n");
+    write(client_fd, response, strlen(response));
+    break;
+
+} else {
+    snprintf(response, BUFFER_SIZE, "ERROR Unknown command. Valid commands: LOGIN, MSG, QUIT\n");
+}
 
         write(client_fd, response, strlen(response));
     }
 
-    printf("Client disconnected.\n");
+    if (bytes_read == 0) {
+        printf("Client disconnected gracefully.\n");
+    } else if (bytes_read < 0) {
+        perror("Read error");
+    }
+
     close(client_fd);
 }
 void* client_thread(void* arg) {

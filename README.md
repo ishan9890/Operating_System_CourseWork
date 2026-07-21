@@ -273,3 +273,21 @@ connected, authenticated as different users, and exchanged messages
 independently and concurrently, with neither blocking the other.
 Demonstrates correct application of POSIX threading (from Task 1) to a
 networked, multi-client server context.
+
+### Files: `task4/server.c`, `task4/client.c` (Input Validation)
+**Purpose:** Adds robust validation for malformed input - empty commands,
+incomplete LOGIN/MSG arguments, and unrecognized command words - so the
+server never crashes and always responds with a clear, appropriate error.
+
+**Result:** All edge cases tested successfully: empty input, incomplete
+LOGIN/MSG arguments, and unrecognized commands each produce a distinct,
+correct error message. QUIT and successful LOGIN/MSG continue to work
+correctly alongside the new validation.
+
+**Bug Fixed:** An earlier version was missing the QUIT and "unknown
+command" branches entirely from the if/else-if chain. Since `response`
+was declared but left uninitialized when no branch matched, the server
+sent back stale data from a previous loop iteration instead of a correct
+response or crash - a real example of undefined behavior from using an
+uninitialized variable, only fixed by ensuring every possible input path
+explicitly sets `response` before it is sent.
