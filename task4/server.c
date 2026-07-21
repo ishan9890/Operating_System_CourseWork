@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 #define MAX_USERS 5
 #define MAX_LEN 50
@@ -93,11 +94,17 @@ void handle_client(int client_fd) {
     printf("Client disconnected.\n");
     close(client_fd);
 }
-
+void* client_thread(void* arg) {
+    int client_fd = *(int*)arg;
+    free(arg);  
+    handle_client(client_fd);
+    return NULL;
+}
 int main() {
     register_user("ishan", "ishan123");
     register_user("faker", "faker123");
-    int server_fd, client_fd;
+
+    int server_fd;
     struct sockaddr_in address;
     int addrlen = sizeof(address);
 
@@ -126,15 +133,23 @@ int main() {
 
     printf("Server listening on port %d...\n", PORT);
 
-    client_fd = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
-    if (client_fd < 0) {
-        perror("Accept failed");
-        exit(EXIT_FAILURE);
+    while (1) {  // loop forever, accepting new clients
+        int* client_fd_ptr = malloc(sizeof(int));
+        *client_fd_ptr = accept(server_fd, (struct sockaddr*)&address, (socklen_t*)&addrlen);
+
+        if (*client_fd_ptr < 0) {
+            perror("Accept failed");
+            free(client_fd_ptr);
+            continue;  
+        }
+
+        printf("Client connected (fd=%d).\n", *client_fd_ptr);
+
+        pthread_t tid;
+        pthread_create(&tid, NULL, client_thread, client_fd_ptr);
+        pthread_detach(tid);  
     }
-    printf("Client connected.\n");
 
-    handle_client(client_fd);
-
-    close(server_fd);
+    close(server_fd);  
     return 0;
 }

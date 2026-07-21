@@ -255,3 +255,21 @@ correctly rejected with a clear error; after successful LOGIN, MSG
 commands succeed and are tagged with the authenticated username. (2)
 LOGIN with an incorrect password is correctly rejected with "Invalid
 credentials", and the connection remains unauthenticated.
+
+### Files: `task4/server.c`, `task4/client.c` (Multi-Client Concurrency)
+**Purpose:** Server now loops `accept()` continuously and spawns a new
+detached pthread per connected client, allowing multiple clients to be
+served simultaneously without blocking one another.
+
+**Compile:**
+```bash
+cd task4
+gcc -o server server.c -pthread
+gcc -o client client.c
+```
+
+**Result:** Verified with 2 simultaneous clients (fd=4, fd=5) - both
+connected, authenticated as different users, and exchanged messages
+independently and concurrently, with neither blocking the other.
+Demonstrates correct application of POSIX threading (from Task 1) to a
+networked, multi-client server context.
